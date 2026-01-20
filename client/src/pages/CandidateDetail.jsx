@@ -42,7 +42,7 @@ const CandidateDetail = () => {
 
     if (!candidate) return null;
 
-    const resumeUrl = candidate.resumeUrl ? `http://localhost:5000${candidate.resumeUrl}` : null;
+    const resumeUrl = candidate.resumeUrl ? `${import.meta.env.VITE_BASE_API_URL}${candidate.resumeUrl}` : null;
 
     const handleStatusUpdate = async (newStatus) => {
         try {
