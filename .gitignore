@@ -1,0 +1,51 @@
+# Node dependencies
+node_modules/
+**/node_modules/
+
+# Build outputs
+/dist
+/build
+/out
+client/dist/
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.env*
+**/.env
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# OS specific files
+.DS_Store
+Thumbs.db
+
+# IDEs and editors
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+*.swp
+*.swo
+
+# Testing
+/coverage
+client/coverage/
+
+# Server specific
+server/uploads/
+server/ai-diag-results.txt
+
+# BMAD / Agent specific (Uncomment if you want to ignore these)
+# _bmad-output/
+# .agent/
+# .claude/
+
