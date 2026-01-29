@@ -46,7 +46,7 @@ exports.uploadResume = async (req, res) => {
                 fullRawText: rawText || '',
                 parsingConfidence: confidence,
                 parsingStatus: 'success',
-                status: 'Assessment'
+                status: 'Shortlisted'
             }
         });
 
@@ -81,7 +81,7 @@ exports.createCandidates = async (req, res) => {
             fullRawText: c.fullRawText || '',
             parsingStatus: 'success',
             parsingConfidence: c.parsingConfidence || 1.0,
-            status: c.status || 'Assessment'
+            status: ['Shortlisted', 'Screening', 'In Progress', 'Selected', 'Offer', 'Onboarding', 'Ready to Join', 'Active', 'Rejected'].includes(c.status) ? c.status : 'Shortlisted'
         }));
 
         const result = await Candidate.insertMany(cleanCandidates);
@@ -229,17 +229,24 @@ exports.getDashboardStats = async (req, res) => {
                 $group: {
                     _id: null,
                     totalCandidates: { $sum: 1 },
+                    applied: {
+                        $sum: { $cond: [{ $eq: ["$status", "Shortlisted"] }, 1, 0] }
+                    },
                     assessment: {
-                        $sum: { $cond: [{ $eq: ["$status", "Assessment"] }, 1, 0] }
+                        // Mapping "Assessment" to "Starting Stages" (Applied + Screening) for backward compatibility in UI or just Screening?
+                        // Let's map it to "In Progress" + "Screening"
+                        $sum: { $cond: [{ $in: ["$status", ["Screening", "In Progress"]] }, 1, 0] }
                     },
                     interview: {
-                        $sum: { $cond: [{ $eq: ["$status", "Interview"] }, 1, 0] }
+                        $sum: { $cond: [{ $eq: ["$status", "Selected"] }, 1, 0] }
                     },
                     offer: {
-                        $sum: { $cond: [{ $eq: ["$status", "Offer"] }, 1, 0] }
+                        // Offer + Onboarding
+                        $sum: { $cond: [{ $in: ["$status", ["Offer", "Onboarding"]] }, 1, 0] }
                     },
                     hired: {
-                        $sum: { $cond: [{ $eq: ["$status", "Hired"] }, 1, 0] }
+                        // Active + Ready to Join
+                        $sum: { $cond: [{ $in: ["$status", ["Active", "Ready to Join"]] }, 1, 0] }
                     },
                     rejected: {
                         $sum: { $cond: [{ $eq: ["$status", "Rejected"] }, 1, 0] }
@@ -250,6 +257,7 @@ exports.getDashboardStats = async (req, res) => {
 
         const data = stats.length > 0 ? stats[0] : {
             totalCandidates: 0,
+            applied: 0,
             assessment: 0,
             interview: 0,
             offer: 0,
@@ -312,5 +320,87 @@ exports.deleteCandidate = async (req, res) => {
         res.status(200).json({ success: true, message: 'Candidate deleted successfully' });
     } catch (error) {
         res.status(500).json({ error: 'Server error deleting candidate' });
+    }
+};
+
+/**
+ * Story 9.1: Add a Round
+ * POST /api/candidates/:id/rounds
+ */
+exports.addRound = async (req, res) => {
+    try {
+        const { type, name, interviewer } = req.body;
+        const candidate = await Candidate.findById(req.params.id);
+
+        if (!candidate) return res.status(404).json({ error: 'Candidate not found' });
+
+        candidate.rounds.push({
+            type,
+            name,
+            interviewer,
+            status: 'Pending',
+            date: new Date()
+        });
+
+        // Auto-update status to In Progress if it was Shortlisted/Screening OR Selected (adding more rounds)
+        if (['Shortlisted', 'Screening', 'Selected'].includes(candidate.status)) {
+            candidate.status = 'In Progress';
+        }
+
+        await candidate.save();
+        res.status(200).json({ success: true, candidate });
+
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to add round' });
+    }
+};
+
+/**
+ * Story 9.1: Update Round Feedback
+ * PATCH /api/candidates/:candidateId/rounds/:roundId
+ */
+exports.updateRound = async (req, res) => {
+    try {
+        const { candidateId, roundId } = req.params;
+        const { feedback, score, status } = req.body;
+
+        const candidate = await Candidate.findById(candidateId);
+        if (!candidate) return res.status(404).json({ error: 'Candidate not found' });
+
+        const round = candidate.rounds.id(roundId);
+        if (!round) return res.status(404).json({ error: 'Round not found' });
+
+        if (feedback) round.feedback = feedback;
+        if (score !== undefined) round.score = score;
+        if (status) round.status = status;
+
+        // Auto-update candidate status based on round outcomes
+        if (status === 'Pending' || status === 'Passed') {
+            const allPassed = candidate.rounds.every(r => r.status === 'Passed');
+            if (allPassed && candidate.rounds.length > 0) {
+                candidate.status = 'Selected'; // Ready for Offer
+            }
+        }
+
+        // Auto-update to Rejected if any round is marked as Failed
+        if (status === 'Failed') {
+            candidate.status = 'Rejected';
+            // Auto-generate rejection reason
+            // Find the index of the round for user display (1-based)
+            const roundIndex = candidate.rounds.findIndex(r => r._id.toString() === roundId) + 1;
+            candidate.rejectionReason = `Rejected in Round ${roundIndex}: ${round.type} - ${round.name}`;
+
+            // Also save feedback to main reason if exists
+            if (feedback) {
+                candidate.rejectionReason += ` (${feedback})`;
+            }
+        }
+
+        await candidate.save();
+        res.status(200).json({ success: true, candidate });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Failed to update round' });
     }
 };

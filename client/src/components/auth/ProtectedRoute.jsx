@@ -2,7 +2,7 @@ import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { Loader2 } from 'lucide-react';
 
-const ProtectedRoute = ({ children }) => {
+const ProtectedRoute = ({ children, allowedRoles }) => {
     const { user, loading } = useAuth();
     const location = useLocation();
 
@@ -17,6 +17,17 @@ const ProtectedRoute = ({ children }) => {
     if (!user) {
         // Redirect to /login but save the current location they were trying to access
         return <Navigate to="/login" state={{ from: location }} replace />;
+    }
+
+    // Role Check
+    if (allowedRoles && !allowedRoles.includes(user.role)) {
+        // Redirect to appropriate dashboard based on actual role
+        if (user.role === 'intern') {
+            return <Navigate to="/portal" replace />;
+        } else if (user.role === 'manager' || user.role === 'admin') {
+            return <Navigate to="/dashboard" replace />;
+        }
+        return <Navigate to="/login" replace />;
     }
 
     return children;

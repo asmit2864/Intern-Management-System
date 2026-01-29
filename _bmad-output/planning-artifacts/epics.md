@@ -20,7 +20,7 @@ This document provides the complete epic and story breakdown for InternManagemen
 *   **FR5:** System automatically extracts Name, Email, and Skills from PDFs.
 *   **FR6:** Manager can resolve parsing errors manually if extraction fails.
 *   **FR7:** Manager can view all candidates in a Sortable/Filterable List.
-*   **FR8:** Manager can view candidate status (Applied, Shortlisted, Offered, Joined).
+*   **FR8:** Manager can view candidate status (Shortlisted, Screening, In Progress, Selected, Offered, Joined, Rejected).
 *   **FR9:** **(Mobile)** Manager can view a "Card View" of candidates optimized for mobile screens.
 *   **FR10:** Manager can generate a PDF offer letter using a standard template.
 *   **FR11:** Manager can preview the PDF before sending.
@@ -223,8 +223,8 @@ So that I can persist resumes and tracking info.
 **When** the schema is validated
 **Then** it should support fields: Name, Email, Phone, Skills, Education, Experience, ResumeURL
 **And** it should support **Social Links** (GitHub, LinkedIn)
-**And** `status` should support: Assessment, Interview, Offer, Hired, Rejected
-**And** default status should be `Assessment`
+**And** `status` should support: Shortlisted, Screening, In Progress, Selected, Offer, Onboarding, Ready to Join, Active, Rejected
+**And** default status should be `Shortlisted`
 
 ### Story 2.4: Upload Progress & Staging Display
 
@@ -265,7 +265,7 @@ So that I can commit the batch to the database.
 
 ### Epic 3: Hiring Command Center (Dashboard)
 
-**Goal:** Manage the intern pipeline and tracked data from "Applied" to "Joined".
+**Goal:** Manage the intern pipeline and tracked data from "Shortlisted" to "Joined".
 
 ### Story 3.1: Candidate List API
 
@@ -278,7 +278,7 @@ So that the dashboard can display the right data.
 **Given** the database has candidates
 **When** I GET `/api/candidates`
 **Then** I should receive a paginated list
-**And** I should be able to filter by `status` (e.g. ?status=Applied)
+**And** I should be able to filter by `status` (e.g. ?status=Shortlisted)
 **And** the response should include basic profile info (Name, Email, Status, ParsingConfidence)
 
 ### Story 3.2: Dashboard Data Table
@@ -344,12 +344,65 @@ So that I can track progress.
 
 **Acceptance Criteria:**
 **Given** a candidate is in any stage
-**When** I change the status
-**Then** it should support: Assessment -> Interview -> Offer -> Hired or Rejected
+**Then** it should support: Shortlisted -> Screening -> In Progress -> Selected -> Offer -> Active or Rejected
 **And** **"Rejected"** status should have distinct Red styling
+**And** failing any round should auto-update status to **"Rejected"**
+**And** a manual **"Reject"** button should be available in the candidate header
+**And** rejecting manually should prompt for a **"Rejection Reason"** (Predefined or Custom)
 **And** the UI should update immediately (Optimistic UI)
 
-### Epic 4: One-Click Offer Engine
+### Story 3.7: Candidate Detail Tabs
+
+As a Hiring Manager,
+I want to view candidate details in organized tabs,
+So that I can focus on one context at a time.
+
+**Acceptance Criteria:**
+**Given** I am on the Candidate Detail page
+**Then** I should see 3 distinct tabs:
+  1. **Resume Preview:** The original PDF.
+  2. **Onboarding & Documents:** Full document history (always visible).
+  3. **Internship Status:** Actions to start internship or view active status.
+
+
+### Epic 9: Advanced Hiring Pipeline
+
+**Goal:** Replace static status updates with a dynamic, round-based evaluation workflow.
+
+### Story 9.1: Dynamic Round Management
+As a Hiring Manager,
+I want to add multiple evaluation rounds (Assessment, GD, Interview),
+So that I can track the candidate's journey in detail.
+
+**Acceptance Criteria:**
+**Given** a candidate in progress
+**When** I click "Add Round"
+**Then** I can select the type (Assessment, GD, Technical, HR)
+**And** I can enter a score/feedback
+**And** the next interviewer can see this history
+
+### Story 9.2: Strict State Guards
+As a System,
+I want to lock future stages until prerequisites are met,
+So that process integrity is maintained.
+
+**Acceptance Criteria:**
+**Given** a candidate has not passed interviews
+**Then** the "Send Offer" button should be disabled
+**And** the "Onboarding" tab should be locked
+**When** the candidate is marked "Selected"
+**Then** the "Send Offer" button becomes active
+
+### Story 9.3: Sequential Evaluation Enforcement
+As a System,
+I want to enforce strictly sequential round evaluations,
+So that process integrity is ensured.
+
+**Acceptance Criteria:**
+**Given** multiple rounds in the pipeline (e.g., Round 1, Round 2)
+**When** Round 1 is "Pending"
+**Then** Round 2's "Evaluate" and "Review" actions should be **Locked**
+**And** if Round 1 is marked "Failed", Round 2 should be visibly **Terminated** (Red Styling)
 
 **Goal:** Eliminate manual letter creation with automated generation and delivery using the User's provided template.
 
@@ -426,6 +479,7 @@ So that I know the action succeeded.
 **When** the sending succeeds
 **Then** the "Generate/Send Offer" button in the Candidate View should change to **"Sent"** (Grey, Disabled)
 **And** the Candidate Status should automatically update to **"Offer"**
+**And** the **Joining Date** selected should be saved to the candidate profile
 **And** I should see a success message
 
 ### Epic 5: System Reliability & Security Shield
@@ -515,3 +569,157 @@ As a Developer, I want to manage chat context per session, so that the LLM remem
 
 #### Story 6.4: The "Hiring Hardwalls" (Safety)
 As a Security Officer, I want the bot to refuse non-hiring questions, so that the system remains focused and professional.
+
+### Epic 7: Onboarding & Document Verification
+
+**Goal:** Streamline the transition from "Offer Accepted" to "Ready to Join" through automated document collection and verification.
+
+### Story 7.1: Enable Onboarding & User Creation
+As a Hiring Manager,
+I want to "Enable Onboarding" for a candidate,
+So that they get a user account and access to the portal.
+
+**Acceptance Criteria:**
+**Given** a candidate has accepted the offer
+**When** I click "Enable Onboarding"
+**Then** a User account (Role: Intern) should be created
+**And** an email should be sent with login credentials
+**And** the candidate status should change to `Onboarding`
+
+### Story 7.2: Candidate Document Upload
+As an Intern,
+I want to upload my joining documents (Aadhar, PAN, Degree),
+So that I can verify my eligibility.
+
+**Acceptance Criteria:**
+**Given** I am logged in as an Intern
+**When** I upload a file for a specific document type
+**Then** the file should be saved safely
+**And** the status for that document should be `Pending Verification`
+
+### Story 7.3: Manager Document Verification
+As a Hiring Manager,
+I want to view and verify uploaded documents,
+So that I can clear the candidate for joining.
+
+**Acceptance Criteria:**
+**Given** a candidate has uploaded docs
+**When** I view the Onboarding tab
+**Then** I can preview the file (PDF/Image)
+**And** I can mark it as `Verified` or `Rejected` (with reason)
+**And** if "Verified", the timestamp is recorded.
+
+### Story 7.4: Self-Healing Status Logic
+As a System,
+I want to automatically update the candidate's status based on document compliance,
+So that manual status updates are minimized.
+
+**Acceptance Criteria:**
+**Given** a candidate is in `Onboarding`
+**When** ALL required documents are marked `Verified`
+**Then** the candidate status should auto-update to `Ready to Join`
+**But** if a document is later rejected, the status should revert to `Onboarding`
+**Unless** the candidate is already `Active` (Active interns should NOT revert)
+
+### Story 7.5: Request Document Re-upload
+As a Manager,
+I want to request a re-upload for a document that was previously verified,
+So that I can correct audit mistakes.
+
+**Acceptance Criteria:**
+**Given** a verified document
+**When** I click "Request Re-upload" (Re-verify)
+**Then** I should be prompted for a reason
+**And** the document status should change to `Rejected`
+**And** the Intern should see an alert requesting re-upload
+
+### Epic 8: Internship Management & Performance
+
+**Goal:** Manage the active internship lifecycle including training, performance tracking, and mentorship.
+
+### Story 8.1: Start Internship
+As a Manager,
+I want to officially start the internship for a candidate,
+So that their timeline and performance tracking begins.
+
+**Acceptance Criteria:**
+**Given** a candidate is `Ready to Join`
+**When** I click "Start Internship"
+**Then** the status changes to `Active`
+**And** the `internshipStartDate` is recorded
+**And** a Jira Snapshot record is initialized
+
+### Story 8.2: Weekly Performance Scorecard
+As a Manager,
+I want to submit a weekly score (**1-5 Stars**) and feedback,
+So that the intern's progress is tracked.
+
+**Acceptance Criteria:**
+**Given** an Active intern
+**When** I submit a review for the current week
+**Then** the score and feedback are saved
+**And** the intern can view the feedback in their portal
+
+### Story 8.3: Training Board Visualization
+As a User (Intern/Manager),
+I want to view the training modules and progress,
+So that I know what needs to be learned.
+
+**Acceptance Criteria:**
+**Given** I am on the Training tab
+**Then** I should see a Kanban/List of training modules
+**And** I can see the completion status of each
+
+### Story 8.4: Dashboard Analytics & Jira Integration
+As a Manager,
+I want to see a holistic view of the intern's performance (Jira + Reviews),
+So that I can assess their value.
+
+**Acceptance Criteria:**
+**Given** the Dashboard
+**Then** I should see the "Velocity" (Active Tickets)
+**And** I should see the "Last Review Score"
+### Story 8.5: Remove Training Module
+As a Manager,
+I want to remove an assigned training module,
+So that I can correct mistakes or update requirements.
+
+**Acceptance Criteria:**
+**Given** an assigned module
+**When** I click the "Delete" icon and confirm
+**Then** the module is removed from the list
+**And** a notification is sent to the intern
+
+### Story 8.6: Intern Notifications
+As an Intern,
+I want to be notified of critical updates,
+So that I stay informed about changes to my tasks.
+
+**Acceptance Criteria:**
+**Given** a manager performs a critical action (e.g. Delete Training)
+**When** I log in to my dashboard
+**Then** I should see an Alert notification
+**And** I can dismiss it after reading
+
+### Story 8.7: Manager Custom Notifications
+As a Manager,
+I want to send a custom notification to an intern,
+So that I can communicate important updates anonymously or formally.
+
+**Acceptance Criteria:**
+**Given** I am on the Intern Detail page
+**When** I click "Send Notification"
+**Then** a modal should appear asking for Title and Message
+**And** sending it should immediately trigger a notification for the intern
+
+### Story 8.8: Advanced Notification Badge
+As a User,
+I want to see the status of my notifications at a glance,
+So that I know if I have new items or just history.
+
+**Acceptance Criteria:**
+**Given** I have notifications
+**Then** the Bell Icon should show a **Red Dot** if there are Unread items
+**And** it should show a **Yellow Dot** if all items are Read but present
+**And** it should show **No Dot** if the list is empty
+**And** visiting the Notifications page should auto-mark all as read (Red -> Yellow)

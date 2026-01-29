@@ -15,7 +15,7 @@ inputDocuments: ['c:/Users/Wissen/Desktop/InternManagement/_bmad-output/planning
 ## Executive Summary
 
 ### Project Vision
-To empower Hiring Managers with a "Zero-Hassle" Intern Management System that automates the tedious parts of hiring (parsing, offers) so they can focus on talent. The experience should feel like a "Command Center"—powerful, responsive, and reassuring.
+To empower Hiring Managers with a "Zero-Hassle" Intern Management System (consisting of **Recruitment Hub**, **Intern Manager**, and **Intern Dashboard**) that automates the tedious parts of hiring so they can focus on talent.
 
 ### Target Users
 *   **The Efficient Manager:** Values speed and accuracy above all. Low tolerance for friction.
@@ -165,6 +165,7 @@ The **"Click-to-Ship"** Workflow. The user acts as an approver, not a data entry
 *   **Components:**
     *   **Cards:** 1px border (`border-slate-200`), White bg, `rounded-lg`.
     *   **Inputs:** `h-10` (40px) standard height for touch targets.
+    *   **Headers:** Standardized 64px vertical spacing (`py-8` equivalent) across all portals.
 
 ## Design Direction Decision
 
@@ -228,7 +229,33 @@ graph TD
     E -->|Edit| F[Update Fields]
     E -->|Approve| G[Hold 'Send' Button (1s)]
     G --> H[Animation: Sending...]
-    H --> I[Success Toast + Close Modal]
+232:     G --> H[Animation: Sending...]
+233:     H --> I[Success Toast + Close Modal]
+
+### 4. The Onboarding Verification Flow (New)
+Moving from "Offered" to "Ready to Join".
+
+```mermaid
+graph TD
+    A[Intern Uploads Docs] --> B[Intern Manager (Admin)]
+    B --> C{Verify Doc?}
+    C -->|Reject| D[Status Reverts to 'Onboarding']
+    C -->|Verify| E[Check: Are ALL docs verified?]
+    E -->|No| F[Wait for more]
+    E -->|Yes| G[Auto-Update Status: 'Ready to Join']
+```
+
+### 5. The Performance Review Flow (New)
+Weekly routine for the Internship phase.
+
+```mermaid
+graph LR
+    A[Select Intern] --> B[Click 'Add Review']
+    B --> C[Slider Input (1-10)]
+    C --> D[Text Feedback]
+    D --> E[Submit]
+    E --> F[Graph Updates Instantly]
+```
 ```
 
 ### Journey Patterns
@@ -260,6 +287,16 @@ graph TD
 **Anatomy:** Split pane. Left: Read-only PDF view. Right: Form Controls.
 **Behavior:** Debounced "Regenerate" when form data changes.
 
+#### 4. `TrainingBoard`
+**Purpose:** Visual progress tracking.
+**Anatomy:** 
+*   **Notifications Area:** Amber Alerts for critical updates at the top.
+*   **Module List:** Cards representing modules with status badges and action buttons.
+
+#### 5. `PerformanceGraph`
+**Purpose:** Trend analysis.
+**Anatomy:** Line chart showing Weekly Score (Y-axis) vs Week (X-axis).
+
 ### Implementation Roadmap
 **Phase 1:** Core Table, DropZone, and Basic Modal.
 **Phase 2:** The `LiveOfferPreview` (Complex PDF rendering).
@@ -269,6 +306,7 @@ graph TD
 ### Button Hierarchy
 *   **Primary:** Solid Teal. Used for the main *positive* action on a page.
 *   **Secondary:** Outline Slate. For alternative actions (Cancel, Back).
+*   **Destructive:** Red Outline (`border-red-200 text-red-600`). Fills red on hover for critical actions (Sign Out).
 *   **Ghost:** Transparent/Text. For tertiary actions in menus/tables.
 
 ### Feedback Patterns

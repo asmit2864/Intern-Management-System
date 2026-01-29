@@ -10,11 +10,11 @@ import DeleteConfirmModal from './DeleteConfirmModal';
 
 const STATUS_TABS = [
     { id: 'all', label: 'All Candidates' },
-    { id: 'Assessment', label: 'Assessment' },
-    { id: 'Interview', label: 'Interview' },
+    { id: 'Shortlisted', label: 'Shortlisted' },
+    { id: 'Screening', label: 'Screening' },
+    { id: 'In Progress', label: 'In Progress' },
+    { id: 'Selected', label: 'Selected' },
     { id: 'Offer', label: 'Offer' },
-    { id: 'Hired', label: 'Hired' },
-    { id: 'Rejected', label: 'Rejected' },
 ];
 
 const CandidateList = ({ refreshTrigger, onDeleteSuccess }) => {
@@ -322,7 +322,7 @@ const CandidateList = ({ refreshTrigger, onDeleteSuccess }) => {
                             <thead className="bg-slate-50 border-b border-slate-100 text-slate-500 uppercase tracking-wider text-xs font-semibold">
                                 <tr>
                                     <th className="px-6 py-4">Candidate</th>
-                                    <th className="px-6 py-4">Applied</th>
+                                    <th className="px-6 py-4">Shortlisted</th>
                                     <th className="px-6 py-4">Status</th>
                                     <th className="px-6 py-4">Education</th>
                                     <th className="px-6 py-4">CGPA</th>
@@ -366,11 +366,14 @@ const CandidateList = ({ refreshTrigger, onDeleteSuccess }) => {
                                             <td className="px-6 py-4">
                                                 <span className={`
                                                     inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize
-                                                    ${candidate.status === 'Assessment' ? 'bg-purple-50 text-purple-700' :
-                                                        candidate.status === 'Interview' ? 'bg-blue-50 text-blue-700' :
-                                                            candidate.status === 'Hired' ? 'bg-green-50 text-green-700' :
-                                                                candidate.status === 'Rejected' ? 'bg-red-50 text-red-700' :
-                                                                    'bg-slate-100 text-slate-700'}
+                                                    ${candidate.status === 'Shortlisted' ? 'bg-purple-50 text-purple-700' :
+                                                        candidate.status === 'Screening' ? 'bg-indigo-50 text-indigo-700' :
+                                                            candidate.status === 'In Progress' ? 'bg-blue-50 text-blue-700' :
+                                                                candidate.status === 'Selected' ? 'bg-teal-50 text-teal-700' :
+                                                                    candidate.status === 'Offer' ? 'bg-orange-50 text-orange-700' :
+                                                                        candidate.status === 'Hired' || candidate.status === 'Active' ? 'bg-green-50 text-green-700' :
+                                                                            candidate.status === 'Rejected' ? 'bg-red-50 text-red-700' :
+                                                                                'bg-slate-100 text-slate-700'}
                                                 `}>
                                                     {candidate.status}
                                                 </span>

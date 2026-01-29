@@ -28,9 +28,9 @@ General HR tools are often too complex or expensive, while the status quo (Excel
 
 ### Proposed Solution
 A specialized, single-user web application acting as a dashboard for the Hiring Manager.
-- **Smart Input:** Resume parsing to eliminate data entry.
-- **Instant Action:** "One-Click" Offer Generation that creates the PDF and emails the candidate simultaneously.
-- **Visual Tracking:** Graphical performance analytics to view intern progress over time at a glance.
+- **Phase 1: Hiring:** Smart resume parsing and One-Click Offers.
+- **Phase 2: Onboarding:** Automated document collection and "Self-Healing" verification logic.
+- **Phase 3: Internship:** Performance tracking, Training Boards, and Jira integration (Mocked).
 
 ### Key Differentiators
 The **"Click-to-Offer" Workflow**: Unlike standard tools that just generate a PDF you have to download and email manually, this system unifies generation and delivery into a single button press—turning a 20-minute task into a 2-second action.
@@ -92,10 +92,12 @@ The **"Click-to-Offer" Workflow**: Unlike standard tools that just generate a PD
 3.  **One-Click Offer Engine:** Integrated template editor with a single "Generate & Send" action that handles PDF creation and emailing.
 4.  **Performance Light:** Simplified weekly scorecard input (Rating + Notes) feeding into a visual Performance Trend graph.
 
+5.  **Onboarding Portal:** Dedicated view for interns to upload docs and managers to verify them.
+6.  **Internship Management:** Training modules board (with Notifications) and Weekly Performance Scorecards.
+
 ### Out of Scope for MVP
-*   **Student Portal:** No external login for candidates; they interact via email.
-*   **Interviewer Login:** No separate access accounts for interviewers; scores are entered by the Hiring Manager.
-*   **External Integrations:** No automated sync with Outlook, Jira, or HRIS systems for V1.
+*   **External Integrations:** Real Jira integration (currently mocked).
+*   **Complex HRIS Sync:** No automated sync with corporate payroll systems.
 
 ### MVP Success Criteria
 *   **Adoption:** Hiring Manager uses the system for 100% of the intern cohort tracking.

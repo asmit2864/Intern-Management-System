@@ -19,7 +19,7 @@ _This document builds collaboratively through step-by-step discovery. Sections a
 ### Requirements Overview
 **Functional Requirements:**
 *   **Data Ingestion:** High-fidelity parsing of resume files (PDF/DOCX) into structured candidate profiles.
-*   **Workflow Management:** Kanban-style or List-style state management for candidates (Applied -> Offer).
+*   **Workflow Management:** Kanban-style or List-style state management for candidates (Shortlisted -> Offer).
 *   **Output Generation:** PDF generation for Offer Letters based on templates.
 
 **Non-Functional Requirements:**
@@ -82,6 +82,19 @@ We will scaffold the project manually to ensure a clean slate:
 *   **Database:** MongoDB (v7.0+).
 *   **Schema Enforcement:** Mongoose.
 *   **File Storage:** Binary data (PDFs) will be stored in `GridFS` (if self-hosted) or AWS S3 (compatible). *Decision: Start with S3-compatible local storage (MinIO) or just filesystem for MVP to keep costs zero.*
+*   **New Models:**
+    *   `CandidateDocument`: Tracks upload status and verification.
+    *   `PerformanceReview`: Weekly scores (**1-5 Stars**) and feedback.
+    *   `JiraSnapshot`: Caches Jira metrics (Active Tickets) for dashboard performance.
+    *   `Notification`: Stores system alerts, `title`, `message`, `isRead` status.
+    *   `Notification`: Stores system alerts, `title`, `message`, `isRead` status.
+    *   (Update) `Candidate`: Add `rounds` array for dynamic pipeline tracking and `rejectionReason`.
+
+    ### AI Integration (New)
+    *   **Provider:** Google Gemini API (`@google/generative-ai`).
+    *   **Model:** `gemini-3-flash-preview` (Optimized for speed/cost).
+    *   **Context Strategy:** Raw Resume Text Injection (Truncated to ~10k chars).
+    *   **Persistence:** Ephemeral Chat (Session-based, not stored in DB) to minimize PII risk.
 
 ### Authentication & Security
 *   **Auth:** JWT via `httpOnly` Cookies.
@@ -95,11 +108,18 @@ We will scaffold the project manually to ensure a clean slate:
     *   `POST /upload/resume` (Multipart)
     *   `GET /candidates` (Filtering/Pagination)
     *   `PATCH /candidates/:id/status` (Workflow moves)
+    *   `GET /notifications` (User Alerts)
+    *   `POST /notifications/custom` (Manager Send)
+    *   `PUT /notifications/read-all` (Mark Read)
+    *   `DELETE /notifications/:id` (Dismiss)
 *   **Uploads:** `Multer` for streaming file uploads.
 
 ### Frontend Architecture
 *   **State:** TanStack Query (Server State) + React Context (UI State).
 *   **Routing:** React Router v6 (Data Routers).
+    *   `/dashboard`: Private Manager Route.
+    *   `/portal`: Private Intern Route.
+    *   `/login`: Public Route.
 *   **HTTP Client:** Axios (Interceptors for global error handling).
 
 ### Decision Impact & Implementation Sequence
@@ -176,6 +196,13 @@ intern-management/
     │       │   ├── candidate.controller.js
     │       │   ├── candidate.service.js
     │       │   ├── candidate.model.js
+    │       ├── boarding/
+    │       │   ├── boarding.controller.js
+    │       │   └── candidate-document.model.js
+    │       ├── performance/
+    │       │   ├── performance.controller.js
+    │       │   ├── performance.model.js
+    │       │   └── jira-snapshot.model.js
     │       └── auth/
     └── uploads/ (Temp storage for incoming files)
 ```
@@ -188,6 +215,8 @@ intern-management/
 ### Feature Mapping
 *   **Ingestion:** `client/src/features/candidates/IngestionDropzone.jsx` -> `server/src/modules/candidates/candidate.controller.js` (upload)
 *   **Visual Board:** `client/src/features/candidates/CandidateBoard.jsx`
+*   **Onboarding:** `server/src/modules/boarding` (Doc Verification) -> `client/src/features/intern/DocumentUpload.jsx`
+*   **Performance:** `server/src/modules/performance` (Reviews + Jira Mock) -> `client/src/features/manager/PerformancePage.jsx`
 *   **Authentication:** `server/src/modules/auth` (Middleware + Routes) -> `client/src/hooks/useAuth.js`
 
 ## Architecture Validation Results
@@ -201,7 +230,9 @@ intern-management/
 *   **Real-time status:** Covered by Client-side Polling (React Query).
 
 ### Gap Analysis
-*   **PDF Engine:** Undecided. *Decision: Use `react-pdf` (renderer) on Client or `pdfkit` on Server. Recommendation: Server-side `pdfkit` for reliability.*
+### Gap Analysis
+*   **PDF Engine:** Decided. **Server-side `pdfkit`** implemented for high-fidelity control over the Offer Letter template.
+*   **AI Engine:** Decided. **Google Gemini Flash** for cost-effective, high-speed resume analysis.
 
 ### Architecture Readiness
 **Status:** GREEN.

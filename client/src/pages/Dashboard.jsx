@@ -4,8 +4,9 @@ import { Button } from '../components/ui/Button';
 import IngestionDropzone from '../features/candidates/IngestionDropzone';
 import CandidateList from '../features/candidates/CandidateList';
 import { useState, useEffect } from 'react';
-import api from '../lib/api';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
+import { LayoutDashboard, Database, LogOut, Briefcase } from 'lucide-react';
+import api from '../lib/api';
 
 const Dashboard = () => {
     const navigate = useNavigate();
@@ -57,15 +58,34 @@ const Dashboard = () => {
     return (
         <div className="min-h-screen bg-slate-50 p-8">
             <div className="max-w-[1600px] mx-auto">
-                <header className="flex justify-between items-center mb-8 pb-4 border-b">
-                    <h1 className="text-3xl font-bold text-slate-900 font-sans tracking-tight">
-                        Intern Management Hub
-                    </h1>
+                <header className="flex justify-between items-center mb-8 pb-8 border-b">
+                    <div className="flex items-center gap-4">
+                        <Briefcase className="w-8 h-8 text-indigo-600" />
+                        <h1 className="text-3xl font-bold text-indigo-600 font-sans tracking-tight">
+                            Recruitment Hub
+                        </h1>
+
+                    </div>
                     <div className="flex items-center gap-4">
                         <span className="text-sm text-slate-500">
                             Logged in as <span className="font-semibold text-slate-900">{user?.email}</span>
                         </span>
-                        <Button variant="outline" onClick={handleLogout}>
+                        <div className="flex bg-white rounded-lg p-1 border shadow-sm">
+                            <Button variant="ghost" size="sm" className="bg-indigo-50 text-indigo-700 shadow-sm">
+                                <Database className="w-4 h-4 mr-2" />
+                                Recruitment Hub
+                            </Button>
+                            <Button variant="ghost" size="sm" onClick={() => navigate('/tracking')} className="text-slate-500 hover:text-slate-900">
+                                <LayoutDashboard className="w-4 h-4 mr-2" />
+                                Intern Manager
+                            </Button>
+                        </div>
+                        <Button
+                            variant="outline"
+                            onClick={handleLogout}
+                            className="border-red-200 text-red-600 hover:bg-red-600 hover:text-white hover:border-red-600 transition-colors"
+                        >
+                            <LogOut className="w-4 h-4 mr-2" />
                             Sign Out
                         </Button>
                     </div>

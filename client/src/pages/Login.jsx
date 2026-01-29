@@ -18,7 +18,11 @@ const Login = () => {
     // Redirect if already logged in
     useEffect(() => {
         if (user) {
-            navigate('/dashboard');
+            if (user.role === 'intern') {
+                navigate('/portal');
+            } else {
+                navigate('/dashboard');
+            }
         }
     }, [user, navigate]);
 
@@ -34,8 +38,13 @@ const Login = () => {
             );
 
             if (response.status === 200) {
-                login(response.data.user);
-                navigate('/dashboard');
+                const loggedInUser = response.data.user;
+                login(loggedInUser);
+                if (loggedInUser.role === 'intern') {
+                    navigate('/portal');
+                } else {
+                    navigate('/dashboard');
+                }
             }
         } catch (err) {
             // Adversarial Fix: Better error extraction, avoiding raw objects

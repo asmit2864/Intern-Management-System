@@ -57,11 +57,25 @@ classification:
 
 ### MVP Feature Set
 *   **Smart Resume Parser:** Drag-and-drop PDF ingestion (Desktop priority).
-*   **Hiring Dashboard:** Status tracking (Fully Mobile Responsive).
+*   **Recruitment Hub:** Status tracking (Fully Mobile Responsive).
 *   **One-Click Offer Engine:** Generate/Send (Desktop) + View/Monitor (Mobile).
 *   **Performance Light:** Scorecard input (Mobile optimized for quick entry).
 *   **Mobile Accessibility:** Responsive design ensuring key actions work on phones.
 *   **Data Management:** Full editability of candidate details (Pre/Post Joining).
+
+### Phase 2: Onboarding (Implemented)
+*   **Document Portal:** Interns upload Aadhar/PAN/Degree.
+*   **Verification:** Manager verifies docs; system auto-updates status to "Ready to Join".
+
+### Phase 2.5: AI-Native Assistant (Implemented)
+*   **Gemini-Powered Chat:** Instant, context-aware queries about any candidate's resume (e.g., "Does he know React?").
+*   **Smart Analysis:** Zero-latency insight extraction using the `gemini-3-flash` model.
+*   **Privacy First:** Ephemeral sessions ensure no PII leakage to the model history.
+
+### Phase 3: Internship (Implemented)
+*   **Training Board:** Kanban view of learning modules.
+*   **Performance:** Weekly scorecards and feedback loops.
+*   **Jira Integration:** (Mocked) Velocity tracking on dashboard.
 
 ### Phase 2: Growth (Post-MVP)
 *   **Student Portal:** Dedicated view for students to accept offers/view tasks.
@@ -96,7 +110,7 @@ classification:
 ### 3. The "System Guardian": Support & Recovery
 *   **Persona:** IT Support (Internal)
 *   **Narrative:** The email server goes down during a batch send. The Manager panics.
-*   **Action:** Support Logins to the "Admin View", sees the "Failed Email" logs, and clicks "Retry Failed Jobs" once the server is up.
+*   **Action:** Support Logins to the "Recruitment Hub", sees the "Failed Email" logs, and clicks "Retry Failed Jobs" once the server is up.
 *   **Outcome:** Emails are delivered delayed but successfully. Manager gets a "Success" notification.
 *   **Key Capabilities:** Admin Dashboard, Error Logs, Retry Logic.
 
@@ -104,6 +118,7 @@ classification:
 *   **Core:** Bulk Parsing, Template Engine, Email Automation.
 *   **Data:** Full editability of candidate profile at ALL stages (Shortlisted, Offered, Joined).
 *   **Constraint:** "Retract Offer" is **NOT** a supported action; once sent, it's final in the system.
+*   **Rejection:** Candidates can be rejected manually via the dashboard or automatically if they fail any hiring round.
 
 ## Web Application Requirements
 
@@ -127,15 +142,21 @@ classification:
 *   **FR1:** Hiring Manager can log in using Email/Password.
 *   **FR2:** System enforces session timeouts for security (auto-logout).
 *   **FR3:** Admin can reset user passwords.
+*   **FR3.1:** **Role-Based Access Control (RBAC)** strictly separates Manager views (`/dashboard`) from Intern views (`/portal`).
+*   **FR3.2:** **Intern Portal:** Specialized view for Interns to track Onboarding, Training, and Performance (`/portal`).
 
 ### 2. Candidate Ingestion (The Parser)
 *   **FR4:** Manager can drag-and-drop multiple PDF resumes at once.
 *   **FR5:** System automatically extracts Name, Email, and Skills from PDFs.
 *   **FR6:** Manager can resolve parsing errors manually if extraction fails.
+*   **FR6.1:** Manager can define a **Dynamic Hiring Pipeline** (Add rounds like Assessment, GD).
+*   **FR6.2:** Manager can log feedback and scores for each round.
+*   **FR6.3:** System automatically marks candidate as **"Rejected"** if any round is marked as **"Failed"**.
+*   **FR6.4:** System enforces **State Guards** (e.g., Cannot send offer until selected).
 
 ### 3. Hiring Dashboard & Visibility
 *   **FR7:** Manager can view all candidates in a Sortable/Filterable List.
-*   **FR8:** Manager can view candidate status (Applied, Shortlisted, Offered, Joined).
+*   **FR8:** Manager can view candidate status (Shortlisted, Screening, In Progress, Selected, Offered, Joined, Rejected).
 *   **FR9:** **(Mobile)** Manager can view a "Card View" of candidates optimized for mobile screens.
 
 ### 4. Offer Management
@@ -149,14 +170,25 @@ classification:
 *   **FR15:** Manager can upload secure attachments (ID Proofs) to the candidate profile.
 *   **FR16:** System encrypts sensitive PII (Passport/Pan Card) at rest.
 
-### 6. Performance Tracking (Light)
-*   **FR17:** Manager can log a global "Weekly Score" (1-10) for a joined intern.
+6. Performance Tracking (Internship Phase)
+*   **FR17:** Manager can log a global "Weekly Score" (**1-5 Star Rating**) for a joined intern.
 *   **FR18:** Manager can add free-text notes to a weekly log.
 *   **FR19:** System visualizes the score trend on the Candidate Profile.
+*   **FR22:** Manager can view "Jira Velocity" (Mocked Data) alongside performance scores.
+*   **FR26:** Manager can remove assigned training modules.
+*   **FR27:** Interns receive in-app notifications for critical updates (e.g. Training Removed).
+*   **FR28:** Manager can send "Custom Notifications" (Title + Message) to interns.
+*   **FR29:** Intern Portal displays a "3-State Badge" (Red=Unread, Yellow=History, None=Empty) on the bell icon.
+
+### 8. Onboarding & Verification
+*   **FR23:** Intern can upload documents (Aadhar, PAN, Degree).
+*   **FR24:** Manager can Verify/Reject documents.
+*   **FR25:** System automatically moves Candidate to "Ready to Join" when all docs are verified.
+*   **FR30:** Manager can request re-upload for already verified documents (Corner Case).
 
 ### 7. System Reliability
 *   **FR20:** System retries failed emails automatically (up to 3 times).
-*   **FR21:** System logs all email failures for Admin review.
+*   **FR21:** System logs all email failures for Admin review (in Recruitment Hub).
 
 ## Non-Functional Requirements
 

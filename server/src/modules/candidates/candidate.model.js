@@ -36,8 +36,37 @@ const candidateSchema = new mongoose.Schema({
     },
     status: {
         type: String,
-        enum: ['Assessment', 'Interview', 'Offer', 'Hired', 'Rejected'],
-        default: 'Assessment',
+        enum: ['Shortlisted', 'Screening', 'In Progress', 'Selected', 'Offer', 'Onboarding', 'Ready to Join', 'Active', 'Rejected'],
+        default: 'Shortlisted'
+    },
+    rejectionReason: {
+        type: String,
+        trim: true
+    },
+    // Dynamic Hiring Pipeline
+    rounds: [{
+        type: {
+            type: String,
+            enum: ['Assessment', 'GD', 'Technical', 'Managerial', 'HR'],
+            required: true
+        },
+        name: { type: String, required: true }, // e.g. "Coding Round 1"
+        date: { type: Date, default: Date.now },
+        interviewer: String, // Name of the evaluator
+        feedback: String,
+        score: Number, // Normalized 0-100 or 1-10
+        status: {
+            type: String,
+            enum: ['Pending', 'Passed', 'Failed'],
+            default: 'Pending'
+        }
+    }],
+    jiraAccountId: {
+        type: String,
+        trim: true
+    },
+    internshipStartDate: {
+        type: Date
     },
     parsingConfidence: {
         type: Number,

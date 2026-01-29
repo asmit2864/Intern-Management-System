@@ -60,6 +60,9 @@ const sendOffer = async (req, res) => {
         // Update Candidate Status
         candidate.status = 'Offer';
         candidate.offerSentAt = new Date();
+        if (joiningDate) {
+            candidate.internshipStartDate = new Date(joiningDate);
+        }
         await candidate.save();
 
         res.json({
