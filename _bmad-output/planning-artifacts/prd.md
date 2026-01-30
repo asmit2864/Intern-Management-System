@@ -57,11 +57,11 @@ classification:
 
 ### MVP Feature Set
 *   **Smart Resume Parser:** Drag-and-drop PDF ingestion (Desktop priority).
-*   **Recruitment Hub:** Status tracking (Fully Mobile Responsive).
+*   **Recruitment Hub:** **Liquid Glass Dashboard** with horizontal scrolling pipeline visualization (Fully Mobile Responsive).
 *   **One-Click Offer Engine:** Generate/Send (Desktop) + View/Monitor (Mobile).
-*   **Performance Light:** Scorecard input (Mobile optimized for quick entry).
-*   **Mobile Accessibility:** Responsive design ensuring key actions work on phones.
-*   **Data Management:** Full editability of candidate details (Pre/Post Joining).
+*   **Performance Light:** Scorecard input with slider (Mobile optimized).
+*   **Mobile Accessibility:** Responsive design with "Stack Layout" for candidate grids.
+*   **Rejection Engine:** Manual and automatic rejection with mandatory reasoning logs.
 
 ### Phase 2: Onboarding (Implemented)
 *   **Document Portal:** Interns upload Aadhar/PAN/Degree.
@@ -139,7 +139,7 @@ classification:
 ## Functional Requirements
 
 ### 1. Authentication & Access
-*   **FR1:** Hiring Manager can log in using Email/Password.
+*   **FR1:** Hiring Manager can log in using Email/Password via a **Liquid Glass Auth Page**.
 *   **FR2:** System enforces session timeouts for security (auto-logout).
 *   **FR3:** Admin can reset user passwords.
 *   **FR3.1:** **Role-Based Access Control (RBAC)** strictly separates Manager views (`/dashboard`) from Intern views (`/portal`).
@@ -156,7 +156,7 @@ classification:
 
 ### 3. Hiring Dashboard & Visibility
 *   **FR7:** Manager can view all candidates in a Sortable/Filterable List.
-*   **FR8:** Manager can view candidate status (Shortlisted, Screening, In Progress, Selected, Offered, Joined, Rejected).
+*   **FR8:** Manager can view candidate status via a **Horizontal Scrolling Pipeline** (Shortlisted -> Rounds -> Offer).
 *   **FR9:** **(Mobile)** Manager can view a "Card View" of candidates optimized for mobile screens.
 
 ### 4. Offer Management

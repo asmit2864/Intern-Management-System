@@ -139,7 +139,7 @@ So that I can establish a secure session.
 **And** an httpOnly JWT cookie should be set
 **And** the response body should contain non-sensitive user profile data
 
-### Story 1.3: Frontend Login Screen
+### Story 1.3: Frontend Login Screen [IMPLEMENTED]
 
 As a Hiring Manager,
 I want a login page,
@@ -151,7 +151,7 @@ So that I can enter my credentials.
 **When** I enter a valid email and password and click "Sign In"
 **Then** I should be redirected to the Dashboard
 **And** invalid credentials should show an inline error message
-**And** the page should use the "Sapphire & Slate" theme
+**And** the page should use the **Liquid Glass / Aurora** theme (animated gradients + glassmorphism)
 
 ### Story 1.4: Protected Route Logic
 
@@ -336,7 +336,7 @@ r add info like "Joined Date".
 **Then** the save action should persist the change to the database
 **And** the UI should update immediately (Optimistic Update)
 
-### Story 3.6: Status Workflow Logic
+### Story 3.6: Status Workflow Logic [IMPLEMENTED]
 
 As a Hiring Manager,
 I want to move candidates between stages,
@@ -369,9 +369,9 @@ So that I can focus on one context at a time.
 
 **Goal:** Replace static status updates with a dynamic, round-based evaluation workflow.
 
-### Story 9.1: Dynamic Round Management
+### Story 9.1: Dynamic Round Management [IMPLEMENTED]
 As a Hiring Manager,
-I want to add multiple evaluation rounds (Assessment, GD, Interview),
+I want to add multiple evaluation rounds (Assessment, GD, Interview) via a **Horizontal Scrolling Timeline**,
 So that I can track the candidate's journey in detail.
 
 **Acceptance Criteria:**

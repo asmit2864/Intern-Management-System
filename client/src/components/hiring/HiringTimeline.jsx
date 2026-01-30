@@ -20,8 +20,8 @@ export const HiringTimeline = ({ candidate, onUpdate }) => {
     const [selectedType, setSelectedType] = useState('Assessment');
     const [isDragging, setIsDragging] = useState(false);
 
-
     const rounds = candidate.rounds || [];
+    const isPipelineFrozen = ['Offer', 'Onboarding', 'Ready to Join', 'Active', 'Rejected'].includes(candidate.status);
 
     const handleAddRound = async (e) => {
         e.preventDefault();
@@ -41,8 +41,6 @@ export const HiringTimeline = ({ candidate, onUpdate }) => {
         }
     };
 
-    const isPipelineFrozen = ['Offer', 'Onboarding', 'Ready to Join', 'Active', 'Rejected'].includes(candidate.status);
-
     const onDropRound = (type) => {
         if (isPipelineFrozen) return;
         setSelectedType(type);
@@ -50,233 +48,35 @@ export const HiringTimeline = ({ candidate, onUpdate }) => {
     };
 
     return (
-        <div className="bg-white border border-slate-200 shadow-sm select-none relative z-0">
-            {/* Draggable Shelf */}
-            {!isPipelineFrozen && (
-                <div className="px-8 py-6 border-b border-slate-100 bg-slate-50/50">
-                    <div className="flex flex-col gap-6">
-                        <div>
-                            <h3 className="font-bold text-slate-900 text-lg">Build Pipeline</h3>
-                            <p className="text-xs text-slate-500 font-medium tracking-tight">Drag a round type tile and drop it into the timeline below</p>
-                        </div>
+        <div className="bg-white border border-slate-200 shadow-sm select-none relative z-0 flex flex-col w-full max-w-full">
+            {/* 1. Draggable Shelf Section */}
+            <PipelineHeader
+                isPipelineFrozen={isPipelineFrozen}
+                setIsDragging={setIsDragging}
+                onDropRound={onDropRound}
+            />
 
-                        <div className="flex gap-4 overflow-visible">
-                            {ROUND_TYPES.map((type) => (
-                                <motion.div
-                                    key={type.id}
-                                    drag
-                                    dragMomentum={false}
-                                    dragElastic={0}
-                                    dragSnapToOrigin
-                                    transition={{ type: "just" }}
-                                    onDragStart={() => setIsDragging(true)}
-                                    onDragEnd={(e, info) => {
-                                        setIsDragging(false);
-                                        if (info.offset.y > 60) {
-                                            onDropRound(type.id);
-                                        }
-                                    }}
-                                    whileHover={{ scale: 1.05 }}
-                                    whileTap={{ scale: 0.95 }}
-                                    whileDrag={{
-                                        scale: 1.15,
-                                        zIndex: 1000,
-                                        boxShadow: "0 25px 50px -12px rgb(0 0 0 / 0.25)"
-                                    }}
-                                    className="flex items-center gap-2 bg-white border border-slate-200 px-5 py-3 rounded-xl shadow-sm cursor-grab active:cursor-grabbing hover:border-indigo-300 hover:shadow-md shrink-0 relative"
-                                >
-                                    <div className={`w-2 h-2 rounded-full ${type.color}`}></div>
-                                    <span className="text-xs font-bold text-slate-700">{type.id}</span>
-                                </motion.div>
-                            ))}
-                        </div>
-                    </div>
-                </div>
-            )}
+            {/* 2. Pipeline Visualizer - ISOLATED SCROLL CONTEXT */}
+            {/* Wrapper ensures this component does not stretch the parent beyond 100% width */}
+            <div className="w-full max-w-full overflow-hidden border-b border-slate-100">
+                <PipelineVisualizer
+                    rounds={rounds}
+                    isPipelineFrozen={isPipelineFrozen}
+                    candidateStatus={candidate.status}
+                    isDragging={isDragging}
+                    setSelectedType={setSelectedType}
+                    setIsAddingRound={setIsAddingRound}
+                />
+            </div>
 
+            {/* 3. Evaluation List - Stacked Vertically */}
             <div className="p-6">
-                {/* Snake Pattern Pipeline */}
-                <div className="flex flex-col gap-12">
-                    {(() => {
-                        const nodes = [
-                            { type: 'start', label: 'Shortlisted' },
-                            ...rounds.map(r => ({ type: 'round', data: r })),
-                            ...(isPipelineFrozen ? [] : [{ type: 'dropzone' }]),
-                            { type: 'offer', label: 'Offer' }
-                        ];
-
-                        const itemsPerRow = 5;
-                        const rows = [];
-                        for (let i = 0; i < nodes.length; i += itemsPerRow) {
-                            rows.push(nodes.slice(i, i + itemsPerRow));
-                        }
-
-                        return rows.map((row, rowIndex) => {
-                            const isLastRow = rowIndex === rows.length - 1;
-                            const isReversed = rowIndex % 2 !== 0;
-
-                            return (
-                                <div key={rowIndex} className="relative">
-                                    {/* Horizontal Connection Line for the row */}
-                                    <div className="absolute top-6 left-12 right-12 h-0.5 bg-slate-300 z-0"></div>
-
-                                    <div className={`flex items-start justify-between px-4 ${isReversed ? 'flex-row-reverse' : ''}`}>
-                                        {row.map((node, nodeIndex) => {
-                                            const originalIndex = isReversed ? (rowIndex * itemsPerRow) + (row.length - 1 - nodeIndex) : (rowIndex * itemsPerRow) + nodeIndex;
-
-                                            // Render logic based on node type
-                                            if (node.type === 'start') {
-                                                return (
-                                                    <div key="start" className="relative z-10 flex flex-col items-center bg-white px-2">
-                                                        <div className="h-12 flex items-center">
-                                                            <div className="w-10 h-10 rounded-full bg-emerald-500 text-white flex items-center justify-center shadow-lg shadow-emerald-100 ring-4 ring-emerald-50 border-2 border-emerald-500">
-                                                                <CheckCircle2 className="w-6 h-6" />
-                                                            </div>
-                                                        </div>
-                                                        <span className="mt-2 text-[10px] font-black uppercase text-emerald-600 tracking-widest">Shortlisted</span>
-                                                    </div>
-                                                );
-                                            }
-
-                                            if (node.type === 'round') {
-                                                const roundType = ROUND_TYPES.find(r => r.id === node.data.type) || ROUND_TYPES[0];
-                                                const Icon = roundType.icon;
-                                                const status = node.data.status;
-
-                                                const isPassed = status === 'Passed';
-
-                                                // Check for manual rejection on this specific stage
-                                                // It is the "Current Stage" if it is the first Pending round and candidate is rejected
-                                                const isFirstPending = status === 'Pending' &&
-                                                    rounds.findIndex(r => r.status === 'Pending') === rounds.findIndex(r => r._id === node.data._id);
-
-                                                // Visual Failure: Explicit Fail OR Manual Rejection at this stage
-                                                const isFailed = status === 'Failed' || (candidate.status === 'Rejected' && isFirstPending);
-
-                                                return (
-                                                    <div key={node.data._id || nodeIndex} className="relative z-10 flex flex-col items-center group bg-white px-2">
-                                                        <div className="h-12 flex items-center">
-                                                            <div className={`
-                                                                w-10 h-10 rounded-full flex items-center justify-center transition-all duration-500
-                                                                ${isPassed ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-100 ring-4 ring-indigo-50' :
-                                                                    isFailed ? 'bg-rose-600 text-white shadow-lg shadow-rose-100 ring-4 ring-rose-50' :
-                                                                        'bg-white border-2 border-slate-300 text-slate-500 rotate-12 group-hover:rotate-0'}
-                                                            `}>
-                                                                <Icon className="w-5 h-5" />
-                                                            </div>
-                                                        </div>
-                                                        <span className={`mt-2 text-[10px] font-black uppercase tracking-widest whitespace-nowrap ${isPassed ? 'text-indigo-600' : isFailed ? 'text-rose-600' : 'text-slate-600'}`}>
-                                                            {node.data.type}
-                                                        </span>
-                                                    </div>
-                                                );
-                                            }
-
-                                            if (node.type === 'dropzone') {
-                                                return (
-                                                    <div key="dropzone" className="relative z-10 px-2 bg-white">
-                                                        <div className="h-12 flex items-center">
-                                                            <button
-                                                                onClick={() => {
-                                                                    setSelectedType('Assessment');
-                                                                    setIsAddingRound(true);
-                                                                }}
-                                                                className={`
-                                                                h-12 w-44 border-[2.5px] border-dashed rounded-2xl flex items-center justify-center transition-all duration-500
-                                                                ${isDragging
-                                                                        ? 'border-indigo-500 bg-indigo-50/80 scale-105 shadow-[0_0_30px_rgba(79,70,229,0.2)] animate-pulse'
-                                                                        : 'border-slate-400 bg-slate-50/50 hover:bg-slate-50 hover:border-slate-500 hover:scale-[1.02]'
-                                                                    }
-                                                            `}>
-                                                                <div className={`flex items-center gap-3 ${isDragging ? 'text-indigo-600' : 'text-slate-600'}`}>
-                                                                    <div className={`w-6 h-6 rounded-lg flex items-center justify-center ${isDragging ? 'bg-indigo-100' : 'bg-slate-200'}`}>
-                                                                        <Plus className={`w-3.5 h-3.5 ${isDragging ? 'animate-spin' : ''}`} />
-                                                                    </div>
-                                                                    <span className="text-[10px] font-black uppercase tracking-[0.2em]">{isDragging ? 'Drop Here' : 'Add Round'}</span>
-                                                                </div>
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                );
-                                            }
-
-                                            if (node.type === 'offer') {
-                                                const isOffered = ['Offer', 'Onboarding', 'Ready to Join', 'Active'].includes(candidate.status);
-                                                return (
-                                                    <div key="offer" className="relative z-10 flex flex-col items-center bg-white px-2">
-                                                        <div className="h-12 flex items-center">
-                                                            <div className={`
-                                                                w-10 h-10 rounded-full flex items-center justify-center transition-all duration-700
-                                                                ${isOffered
-                                                                    ? 'bg-amber-500 text-white shadow-[0_0_20px_rgba(245,158,11,0.5)] ring-4 ring-amber-50'
-                                                                    : 'bg-white border-2 border-slate-300 text-slate-400'
-                                                                }
-                                                            `}>
-                                                                <Rocket className="w-5 h-5" />
-                                                            </div>
-                                                        </div>
-                                                        <span className={`mt-2 text-[10px] font-black uppercase tracking-widest whitespace-nowrap ${isOffered ? 'text-amber-600' : 'text-slate-600'}`}>
-                                                            Offer
-                                                        </span>
-                                                    </div>
-                                                );
-                                            }
-
-                                            return null;
-                                        })}
-                                    </div>
-
-                                    {/* Straight Vertical Connector */}
-                                    {!isLastRow && (
-                                        <div className={`
-                                            absolute top-6 h-20 w-0.5 bg-slate-300
-                                            ${isReversed ? 'left-[48px]' : 'right-[48px]'}
-                                        `} style={{ height: 'calc(100% + 48px)' }}></div>
-                                    )}
-                                </div>
-                            );
-                        });
-                    })()}
-                </div>
-
-                <div className="mt-12 space-y-6">
-                    {rounds.length > 0 && (
-                        <div className="flex items-center gap-3 mb-2">
-                            <h3 className="font-bold text-slate-900 text-lg">Evaluations</h3>
-                            <div className="flex-1 h-px bg-slate-100"></div>
-                        </div>
-                    )}
-                    {rounds.length > 0 ? (
-                        rounds.map((round, idx) => {
-                            const isLocked = idx > 0 && rounds[idx - 1].status === 'Pending';
-
-                            // Check if this is the specific round where manual rejection "stopped" the process
-                            const isFirstPending = round.status === 'Pending' &&
-                                rounds.findIndex(r => r.status === 'Pending') === idx;
-                            const isTerminated = candidate.status === 'Rejected' && isFirstPending;
-
-                            return (
-                                <RoundCard
-                                    key={idx}
-                                    round={round}
-                                    candidateId={candidate._id}
-                                    onUpdate={onUpdate}
-                                    isLocked={isLocked}
-                                    isFrozen={isPipelineFrozen}
-                                    isTerminated={isTerminated}
-                                />
-                            );
-                        })
-                    ) : (
-                        <div className="text-center py-10">
-                            <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-slate-100 shadow-inner">
-                                <Rocket className="w-8 h-8 text-slate-300" />
-                            </div>
-                            <h4 className="font-bold text-slate-900 mb-1">Pipeline is Empty</h4>
-                            <p className="text-sm text-slate-500 mb-0">Drag a round from the shelf into the timeline to start</p>
-                        </div>
-                    )}
-                </div>
+                <EvaluationList
+                    rounds={rounds}
+                    candidate={candidate}
+                    onUpdate={onUpdate}
+                    isPipelineFrozen={isPipelineFrozen}
+                />
             </div>
 
             {/* Add Round Modal */}
@@ -367,6 +167,217 @@ export const HiringTimeline = ({ candidate, onUpdate }) => {
                     </div>
                 )}
             </AnimatePresence>
+        </div>
+    );
+};
+
+// --- Sub Components ---
+
+const PipelineHeader = ({ isPipelineFrozen, setIsDragging, onDropRound }) => {
+    if (isPipelineFrozen) return null;
+
+    return (
+        <div className="px-6 py-6 border-b border-slate-100 bg-slate-50/50">
+            <div className="flex flex-col gap-6">
+                <div>
+                    <h3 className="font-bold text-slate-900 text-lg">Build Pipeline</h3>
+                    <p className="text-xs text-slate-500 font-medium tracking-tight">Drag a round type tile and drop it into the timeline below</p>
+                </div>
+
+                <div className="flex gap-4 overflow-visible">
+                    {ROUND_TYPES.map((type) => (
+                        <motion.div
+                            key={type.id}
+                            drag
+                            dragMomentum={false}
+                            dragElastic={0}
+                            dragSnapToOrigin
+                            transition={{ type: "just" }}
+                            onDragStart={() => setIsDragging(true)}
+                            onDragEnd={(e, info) => {
+                                setIsDragging(false);
+                                if (info.offset.y > 60) {
+                                    onDropRound(type.id);
+                                }
+                            }}
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            whileDrag={{
+                                scale: 1.15,
+                                zIndex: 1000,
+                                boxShadow: "0 25px 50px -12px rgb(0 0 0 / 0.25)"
+                            }}
+                            className="flex items-center gap-2 bg-white border border-slate-200 px-5 py-3 rounded-xl shadow-sm cursor-grab active:cursor-grabbing hover:border-indigo-300 hover:shadow-md shrink-0 relative"
+                        >
+                            <div className={`w-2 h-2 rounded-full ${type.color}`}></div>
+                            <span className="text-xs font-bold text-slate-700">{type.id}</span>
+                        </motion.div>
+                    ))}
+                </div>
+            </div>
+        </div>
+    );
+};
+
+const PipelineVisualizer = ({ rounds, isPipelineFrozen, candidateStatus, isDragging, setSelectedType, setIsAddingRound }) => {
+    return (
+        <div className="px-6 pt-6 pb-2 relative w-full isolate">
+            {/* Scrollable Area */}
+            {/* Removed pr-[110px] padding as offer node is no longer fixed */}
+            <div className="overflow-x-auto custom-scrollbar">
+                {/* min-w-full ensures the container fills the viewport, allowing ml-auto to push the offer node to the right edge */}
+                <div className="flex items-start gap-4 min-w-full w-fit px-8 pt-2 pb-6 relative">
+                    {/* Continuous Connector Line - extends to the far right */}
+                    <div className="absolute top-[32px] left-[82px] right-[82px] h-0.5 bg-slate-300 z-0"></div>
+
+                    {(() => {
+                        // Filter out Offer from the standard mapping
+                        const scrollableNodes = [
+                            { type: 'start', label: 'Shortlisted' },
+                            ...rounds.map(r => ({ type: 'round', data: r })),
+                            ...(isPipelineFrozen ? [] : [{ type: 'dropzone' }])
+                        ];
+
+                        return scrollableNodes.map((node, nodeIndex) => {
+                            if (node.type === 'start') {
+                                return (
+                                    <div key="start" className="relative z-10 flex flex-col items-center px-2 min-w-[100px]">
+                                        <div className="h-12 flex items-center justify-center w-full">
+                                            <div className="w-10 h-10 rounded-full bg-emerald-500 text-white flex items-center justify-center shadow-md shadow-emerald-100 ring-4 ring-white border-2 border-emerald-500">
+                                                <CheckCircle2 className="w-6 h-6" />
+                                            </div>
+                                        </div>
+                                        <span className="mt-3 text-[10px] font-black uppercase text-emerald-600 tracking-widest text-center">Shortlisted</span>
+                                    </div>
+                                );
+                            }
+
+                            if (node.type === 'round') {
+                                const roundType = ROUND_TYPES.find(r => r.id === node.data.type) || ROUND_TYPES[0];
+                                const Icon = roundType.icon;
+                                const status = node.data.status;
+                                const isPassed = status === 'Passed';
+
+                                const isFirstPending = status === 'Pending' &&
+                                    rounds.findIndex(r => r.status === 'Pending') === rounds.findIndex(r => r._id === node.data._id);
+                                const isFailed = status === 'Failed' || (candidateStatus === 'Rejected' && isFirstPending);
+
+                                return (
+                                    <div key={node.data._id || nodeIndex} className="relative z-10 flex flex-col items-center group px-2 min-w-[100px]">
+                                        <div className="h-12 flex items-center justify-center w-full">
+                                            <div className={`
+                                                w-10 h-10 rounded-full flex items-center justify-center transition-all duration-500 ring-4 ring-white
+                                                ${isPassed ? 'bg-indigo-600 text-white shadow-md shadow-indigo-100' :
+                                                    isFailed ? 'bg-rose-600 text-white shadow-md shadow-rose-100' :
+                                                        'bg-white border-2 border-slate-300 text-slate-500 rotate-12 group-hover:rotate-0 hover:border-indigo-400 hover:text-indigo-600'}
+                                            `}>
+                                                <Icon className="w-5 h-5" />
+                                            </div>
+                                        </div>
+                                        <div className="flex flex-col items-center mt-3">
+                                            <span className={`text-[10px] font-black uppercase tracking-widest whitespace-nowrap ${isPassed ? 'text-indigo-600' : isFailed ? 'text-rose-600' : 'text-slate-600'}`}>
+                                                {node.data.type}
+                                            </span>
+                                        </div>
+                                    </div>
+                                );
+                            }
+
+                            if (node.type === 'dropzone') {
+                                return (
+                                    <div key="dropzone" className="relative z-10 px-2 bg-white min-w-[160px] mx-auto">
+                                        <div className="h-12 flex items-center justify-center w-full">
+                                            <button
+                                                onClick={() => {
+                                                    setSelectedType('Assessment');
+                                                    setIsAddingRound(true);
+                                                }}
+                                                className={`
+                                                h-10 w-full px-4 border-2 border-dashed rounded-xl flex items-center justify-center transition-all duration-300
+                                                ${isDragging
+                                                        ? 'border-indigo-500 bg-indigo-50/80 scale-105 shadow-lg shadow-indigo-100 animate-pulse'
+                                                        : 'border-slate-300 bg-slate-50/50 hover:bg-slate-50 hover:border-indigo-400 hover:text-indigo-600'
+                                                    }
+                                            `}>
+                                                <div className={`flex items-center gap-2 ${isDragging ? 'text-indigo-600' : 'text-slate-500'}`}>
+                                                    <Plus className={`w-3.5 h-3.5 ${isDragging ? 'animate-spin' : ''}`} />
+                                                    <span className="text-[10px] font-black uppercase tracking-widest">{isDragging ? 'Drop' : 'Add Round'}</span>
+                                                </div>
+                                            </button>
+                                        </div>
+                                    </div>
+                                );
+                            }
+                            return null;
+                        });
+                    })()}
+
+                    {/* Offer Node - Auto-pushed to right if space exists (ml-auto) */}
+                    {(() => {
+                        const isOffered = ['Offer', 'Onboarding', 'Ready to Join', 'Active'].includes(candidateStatus);
+                        return (
+                            <div className="relative z-10 flex flex-col items-center px-2 min-w-[100px]">
+                                <div className="h-12 flex items-center justify-center w-full relative z-10 pointer-events-auto">
+                                    <div className={`
+                                        w-10 h-10 rounded-full flex items-center justify-center transition-all duration-700 ring-4 ring-white
+                                        ${isOffered
+                                            ? 'bg-amber-500 text-white shadow-md shadow-amber-200'
+                                            : 'bg-white border-2 border-slate-300 text-slate-300'
+                                        }
+                                    `}>
+                                        <Rocket className="w-5 h-5" />
+                                    </div>
+                                </div>
+                                <span className={`mt-3 text-[10px] font-black uppercase tracking-widest whitespace-nowrap ${isOffered ? 'text-amber-600' : 'text-slate-400'}`}>
+                                    Offer
+                                </span>
+                            </div>
+                        );
+                    })()}
+                </div>
+            </div>
+        </div>
+    );
+};
+
+const EvaluationList = ({ rounds, candidate, onUpdate, isPipelineFrozen }) => {
+    return (
+        <div className="mt-0 space-y-6">
+            {rounds.length > 0 && (
+                <div className="flex items-center gap-3 mb-2">
+                    <h3 className="font-bold text-slate-900 text-lg">Evaluations</h3>
+                    <div className="flex-1 h-px bg-slate-100"></div>
+                </div>
+            )}
+            {rounds.length > 0 ? (
+                rounds.map((round, idx) => {
+                    const isLocked = idx > 0 && rounds[idx - 1].status === 'Pending';
+
+                    const isFirstPending = round.status === 'Pending' &&
+                        rounds.findIndex(r => r.status === 'Pending') === idx;
+                    const isTerminated = candidate.status === 'Rejected' && isFirstPending;
+
+                    return (
+                        <RoundCard
+                            key={idx}
+                            round={round}
+                            candidateId={candidate._id}
+                            onUpdate={onUpdate}
+                            isLocked={isLocked}
+                            isFrozen={isPipelineFrozen}
+                            isTerminated={isTerminated}
+                        />
+                    );
+                })
+            ) : (
+                <div className="text-center py-10">
+                    <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-slate-100 shadow-inner">
+                        <Rocket className="w-8 h-8 text-slate-300" />
+                    </div>
+                    <h4 className="font-bold text-slate-900 mb-1">Pipeline is Empty</h4>
+                    <p className="text-sm text-slate-500 mb-0">Drag a round from the shelf into the timeline to start</p>
+                </div>
+            )}
         </div>
     );
 };

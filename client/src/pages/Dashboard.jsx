@@ -7,6 +7,7 @@ import { useState, useEffect } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 import { LayoutDashboard, Database, LogOut, Briefcase } from 'lucide-react';
 import api from '../lib/api';
+import LiquidTabs from '../components/ui/LiquidTabs';
 
 const Dashboard = () => {
     const navigate = useNavigate();
@@ -70,16 +71,13 @@ const Dashboard = () => {
                         <span className="text-sm text-slate-500">
                             Logged in as <span className="font-semibold text-slate-900">{user?.email}</span>
                         </span>
-                        <div className="flex bg-white rounded-lg p-1 border shadow-sm">
-                            <Button variant="ghost" size="sm" className="bg-indigo-50 text-indigo-700 shadow-sm">
-                                <Database className="w-4 h-4 mr-2" />
-                                Recruitment Hub
-                            </Button>
-                            <Button variant="ghost" size="sm" onClick={() => navigate('/tracking')} className="text-slate-500 hover:text-slate-900">
-                                <LayoutDashboard className="w-4 h-4 mr-2" />
-                                Intern Manager
-                            </Button>
-                        </div>
+                        <LiquidTabs
+                            activeId="/dashboard"
+                            tabs={[
+                                { id: '/dashboard', label: 'Recruitment Hub', icon: Database },
+                                { id: '/tracking', label: 'Intern Manager', icon: LayoutDashboard }
+                            ]}
+                        />
                         <Button
                             variant="outline"
                             onClick={handleLogout}

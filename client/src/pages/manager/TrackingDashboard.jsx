@@ -6,6 +6,7 @@ import { Button } from '../../components/ui/Button';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { LogOut, LayoutDashboard, Database, RefreshCw, X, Plus, Calendar, Search, Star, UserCog } from 'lucide-react';
 import { toast } from 'sonner';
+import LiquidTabs from '../../components/ui/LiquidTabs';
 
 const TrackingDashboard = () => {
     const navigate = useNavigate();
@@ -173,16 +174,13 @@ const TrackingDashboard = () => {
                         <span className="text-sm text-slate-500">
                             Logged in as <span className="font-semibold text-slate-900">{user?.email}</span>
                         </span>
-                        <div className="flex bg-white rounded-lg p-1 border shadow-sm">
-                            <Button variant="ghost" size="sm" onClick={() => navigate('/dashboard')} className="text-slate-500 hover:text-slate-900">
-                                <Database className="w-4 h-4 mr-2" />
-                                Recruitment Hub
-                            </Button>
-                            <Button variant="ghost" size="sm" className="bg-indigo-50 text-indigo-700 shadow-sm">
-                                <LayoutDashboard className="w-4 h-4 mr-2" />
-                                Intern Manager
-                            </Button>
-                        </div>
+                        <LiquidTabs
+                            activeId="/tracking"
+                            tabs={[
+                                { id: '/dashboard', label: 'Recruitment Hub', icon: Database },
+                                { id: '/tracking', label: 'Intern Manager', icon: LayoutDashboard }
+                            ]}
+                        />
                         <Button
                             variant="outline"
                             onClick={handleLogout}

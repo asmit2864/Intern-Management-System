@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { useNotification } from '../context/NotificationContext';
 import { Button } from '../components/ui/Button';
 import { LogOut, ShieldCheck, FileText, BookOpen, TrendingUp, LayoutDashboard, Bell } from 'lucide-react';
+import LiquidTabs from '../components/ui/LiquidTabs';
 
 const PortalLayout = () => {
     const { user, logout } = useAuth();
@@ -29,52 +30,43 @@ const PortalLayout = () => {
                         </div>
 
                         {/* Navigation Menu */}
-                        <nav className="flex bg-white rounded-lg p-1 border shadow-sm">
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => navigate('/portal')}
-                                className={`h-auto py-2 ${location.pathname === '/portal' ? 'bg-indigo-50 text-indigo-700 shadow-sm' : 'text-slate-500 hover:text-slate-900'}`}
-                            >
-                                <FileText className="w-3.5 h-3.5 mr-2" />
-                                Documents
-                            </Button>
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => navigate('/portal/training')}
-                                className={`h-auto py-2 ${location.pathname.startsWith('/portal/training') ? 'bg-indigo-50 text-indigo-700 shadow-sm' : 'text-slate-500 hover:text-slate-900'}`}
-                            >
-                                <BookOpen className="w-3.5 h-3.5 mr-2" />
-                                My Learning
-                            </Button>
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => navigate('/portal/performance')}
-                                className={`h-auto py-2 ${location.pathname.startsWith('/portal/performance') ? 'bg-indigo-50 text-indigo-700 shadow-sm' : 'text-slate-500 hover:text-slate-900'}`}
-                            >
-                                <TrendingUp className="w-3.5 h-3.5 mr-2" />
-                                My Performance
-                            </Button>
+                        {/* Navigation Menu */}
+                        <LiquidTabs
+                            activeId={
+                                location.pathname.startsWith('/portal/training') ? '/portal/training' :
+                                    location.pathname.startsWith('/portal/performance') ? '/portal/performance' :
+                                        location.pathname.startsWith('/portal/notifications') ? null :
+                                            '/portal'
+                            }
+                            tabs={[
+                                { id: '/portal', label: 'Documents', icon: FileText },
+                                { id: '/portal/training', label: 'My Learning', icon: BookOpen },
+                                { id: '/portal/performance', label: 'My Performance', icon: TrendingUp }
+                            ]}
+                        />
 
-                            {/* Divider or Spacer could act as 'appropriate space' but flex gap handles it */}
-                            <div className="w-px h-6 bg-slate-200 mx-1 self-center"></div>
+                        {/* Notifications (Separate Icon) */}
+                        <div className="w-px h-6 bg-slate-200 mx-2 self-center"></div>
 
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => navigate('/portal/notifications')}
-                                className={`h-9 w-9 relative ${location.pathname === '/portal/notifications' ? 'bg-indigo-50 text-indigo-700 shadow-sm' : 'text-slate-500 hover:text-indigo-600'}`}
-                            >
-                                <Bell className="w-5 h-5" />
-                                {hasUnread ? (
-                                    <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
-                                ) : hasNotifications ? (
-                                    <span className="absolute top-2 right-2 w-2 h-2 bg-amber-400 rounded-full border border-white"></span>
-                                ) : null}
-                            </Button>
-                        </nav>
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => navigate('/portal/notifications')}
+                            className={`h-11 w-11 relative rounded-full border transition-all duration-300 ${location.pathname === '/portal/notifications'
+                                ? 'bg-indigo-50 border-indigo-200 text-indigo-600 shadow-inner'
+                                : 'bg-white border-slate-200 text-slate-500 hover:text-indigo-600 hover:border-indigo-300 hover:shadow-md'
+                                }`}
+                        >
+                            <Bell className="w-5 h-5" />
+                            {hasUnread ? (
+                                <span className="absolute top-1.5 right-2 flex h-2.5 w-2.5">
+                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500 border-2 border-white"></span>
+                                </span>
+                            ) : hasNotifications ? (
+                                <span className="absolute top-2 right-2.5 w-2 h-2 bg-amber-400 rounded-full border-2 border-white"></span>
+                            ) : null}
+                        </Button>
                     </div>
 
                     <div className="flex items-center gap-4">

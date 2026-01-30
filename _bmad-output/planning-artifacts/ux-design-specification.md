@@ -112,11 +112,11 @@ The experience is defined by **Flow** and **Confidence**. The user should feel l
 *   **Font:** **Inter** (Standard, highly readable) or **Manrope** (Modern, slightly more character).
 
 ### Customization Strategy
-*   **Theme:** "Sapphire & Slate".
-    *   Primary: Deep Blue/Slate (Trust).
-    *   Accent: Vibrant Teal (Action/Success).
-    *   Error: Soft Red (Not alarming).
-*   **Radius:** Small rounded corners (0.5rem) for a professional, crisp feel.
+*   **Theme:** **"Liquid Glass & Aurora"**.
+    *   **Background:** Animated Mesh Gradients (Aurora) in Deep Indigo/Teal.
+    *   **Surfaces:** Glassmorphism (Backdrop blur, semi-transparent white overlays).
+    *   **Typography:** Inter (Standard) mixed with bold, tracking-heavy headers.
+*   **Radius:** 1rem (Large rounded corners) for a premium, modern software feel.
 
 ## 2. Core User Experience (Detailed Flow)
 
@@ -126,7 +126,7 @@ The **"Click-to-Ship"** Workflow. The user acts as an approver, not a data entry
 ### 2.2 User Mental Model
 *   **Current State:** "I am a typist." (Copying data from PDF to Word).
 *   **Future State:** "I am a Director." (Reviewing prepared documents and approving them).
-*   **Metaphor:** "Air Traffic Control" - managing the flow of candidates through gates.
+*   **Metaphor:** **"Beads on a String"** - A linear, horizontal progression where each hiring stage is a milestone on a continuous connector.
 
 ### 2.3 Success Criteria
 *   **Latency:** The "Generate" click must yield a preview in < 500ms.
@@ -173,10 +173,10 @@ The **"Click-to-Ship"** Workflow. The user acts as an approver, not a data entry
 We focused on a **"Modern Utility"** direction. Avoiding "flashy" consumer gradients in favor of "clean, information-dense" professional tools (Linear-style but for HR).
 
 ### Chosen Direction
-**"The Slate Command Center"**
-*   **Sidebar Navigation:** Dark mode sidebar for focus and separation of context.
-*   **Light Content Area:** White background for maximum readability of candidate data.
-*   **High-Contrast Actions:** Teal buttons for primary actions ("Generate Offer") to guide the eye.
+**"The Glass Command Center"**
+*   **Aurora Authentication:** Entry point features a vibrant, animated liquid glass login experience.
+*   **Horizontal Pipeline:** A single scrollable strip (PipelineVisualizer) that makes the candidate's journey linear and clear.
+*   **High-Contrast Actions:** Precision-aligned buttons and status-aware colored rings for instant recognition.
 
 ### Design Rationale
 *   **Readability:** Recruiter dashboards are data-heavy. White backgrounds with Slate text offer the best contrast for long sessions.

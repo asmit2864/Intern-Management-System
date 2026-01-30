@@ -323,7 +323,7 @@ const CandidateDetail = () => {
                 </div>
 
                 {/* Right Panel - Tabs: Resume | Onboarding */}
-                <div className="flex-1 bg-slate-100 flex flex-col h-full">
+                <div className="flex-1 bg-slate-100 flex flex-col h-full min-w-0">
                     {/* Tab Header with State Guards */}
                     <div className="bg-white border-b border-slate-200 px-4 flex items-center gap-6 text-sm font-medium shrink-0">
                         <button

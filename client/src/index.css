@@ -69,8 +69,8 @@
   }
 
   .custom-scrollbar::-webkit-scrollbar-thumb {
-    background-color: rgba(156, 163, 175, 0.3);
-    /* Slate-400 with opacity */
+    background-color: rgba(156, 163, 175, 0.15);
+    /* Lower opacity */
     border-radius: 20px;
   }
 

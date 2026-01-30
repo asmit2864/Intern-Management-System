@@ -88,7 +88,7 @@ We will scaffold the project manually to ensure a clean slate:
     *   `JiraSnapshot`: Caches Jira metrics (Active Tickets) for dashboard performance.
     *   `Notification`: Stores system alerts, `title`, `message`, `isRead` status.
     *   `Notification`: Stores system alerts, `title`, `message`, `isRead` status.
-    *   (Update) `Candidate`: Add `rounds` array for dynamic pipeline tracking and `rejectionReason`.
+    *   (Update) `Candidate`: Add `rounds` array (storing evaluation history, scores, and status) and `rejectionReason` (mandatory string when status is 'Rejected').
 
     ### AI Integration (New)
     *   **Provider:** Google Gemini API (`@google/generative-ai`).
@@ -107,7 +107,9 @@ We will scaffold the project manually to ensure a clean slate:
 *   **Endpoints:**
     *   `POST /upload/resume` (Multipart)
     *   `GET /candidates` (Filtering/Pagination)
-    *   `PATCH /candidates/:id/status` (Workflow moves)
+    *   `PATCH /candidates/:id/status` (Workflow moves/Evaluations)
+    *   `POST /candidates/:id/reject` (Manual rejection with reasoning)
+    *   `POST /candidates/:id/evaluate` (Add evaluation round result)
     *   `GET /notifications` (User Alerts)
     *   `POST /notifications/custom` (Manager Send)
     *   `PUT /notifications/read-all` (Mark Read)
@@ -214,7 +216,9 @@ intern-management/
 
 ### Feature Mapping
 *   **Ingestion:** `client/src/features/candidates/IngestionDropzone.jsx` -> `server/src/modules/candidates/candidate.controller.js` (upload)
-*   **Visual Board:** `client/src/features/candidates/CandidateBoard.jsx`
+*   **Hiring Timeline:** `client/src/components/hiring/HiringTimeline.jsx` (Orchestrator)
+    - `PipelineVisualizer`: Horizontal scrolling track.
+    - `EvaluationList`: Vertical feedback cards.
 *   **Onboarding:** `server/src/modules/boarding` (Doc Verification) -> `client/src/features/intern/DocumentUpload.jsx`
 *   **Performance:** `server/src/modules/performance` (Reviews + Jira Mock) -> `client/src/features/manager/PerformancePage.jsx`
 *   **Authentication:** `server/src/modules/auth` (Middleware + Routes) -> `client/src/hooks/useAuth.js`
